@@ -1,0 +1,66 @@
+{
+    "math": {
+        "number and quantity": [],
+        "algebra": [],
+        "functions": [],
+        "geometry": [],
+        "statistics and probability": []
+    },
+    "english": {
+        "topic development in terms of purpose & focus": [
+            3,
+            8
+        ],
+        "organization, unity, and cohesion": [
+            6,
+            14
+        ],
+        "knowledge of language": [
+            2
+        ],
+        "sentence structure and formation": [
+            10,
+            11
+        ],
+        "usage conventions": [
+            1,
+            9
+        ],
+        "punctuation conventions": [
+            5,
+            13
+        ]
+    },
+    "reading": {
+        "close reading": [
+            1,
+            3
+        ],
+        "central ideas, themes, and summaries": [
+            2,
+            9
+        ],
+        "relationships": [
+            6
+        ],
+        "word meanings and word choice": [
+            7
+        ],
+        "text structure": [
+            5
+        ],
+        "purpose and point of view": [
+            4,
+            8
+        ],
+        "arguments": [],
+        "multiple texts": [
+            10
+        ]
+    },
+    "science": {
+        "interpretation of data": [],
+        "scientific investigation": [],
+        "evaluation of models, inferences, & experimental results": []
+    }
+}
