@@ -7,7 +7,8 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
 interface ReviewNotesProps {
   subject: string;
-  questionId: string;
+  questionId: number;
+  onReviewNotesFilled?: (filled: boolean) => void;
 }
 
 const REASONS = [
@@ -18,7 +19,7 @@ const REASONS = [
   'guessed',
 ];
 
-export default function ReviewNotes({ subject, questionId }: ReviewNotesProps) {
+export default function ReviewNotes({ subject, questionId, onReviewNotesFilled }: ReviewNotesProps) {
   const { user } = useAuth();
   const [selectedReason, setSelectedReason] = useState('');
   const [notes, setNotes] = useState('');
@@ -56,6 +57,20 @@ export default function ReviewNotes({ subject, questionId }: ReviewNotesProps) {
     }
   }, [selectedReason, notes, savedReason, savedNotes]);
 
+  // Notify parent if review notes are filled
+  useEffect(() => {
+    if (onReviewNotesFilled) {
+      onReviewNotesFilled(!!selectedReason);
+    }
+  }, [selectedReason, onReviewNotesFilled]);
+
+  useEffect(() => {
+    if (onReviewNotesFilled) {
+      onReviewNotesFilled(!!selectedReason);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleSave = async () => {
     if (!user) return;
     setIsSaving(true);
@@ -76,56 +91,60 @@ export default function ReviewNotes({ subject, questionId }: ReviewNotesProps) {
   };
 
   return (
-    <div className="card mt-3">
-      <div className="card-body">
-        <h5 className="card-title mb-3">Why did I get this question wrong?</h5>
-        <div className="mb-3">
+    <div className="bg-white rounded-xl shadow-lg transition-shadow duration-300 hover:shadow-none p-6 w-full">
+      <h5 className="text-lg font-semibold mb-3">Question Analysis</h5>
+      {
+        /* Dropdown for wrong reason */
+      }
+      <div className="flex flex-col gap-2">
+        <label htmlFor="wrongReason" className="text-gray-700 font-medium">
+          Reason for wrong answer
+        </label>
+        <select
+          id="wrongReason"
+          name="wrongReason"
+          value={selectedReason}
+          onChange={e => setSelectedReason(e.target.value)}
+          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 shadow focus:border-gray-500 focus:outline-none text-gray-700 mb-2"
+        >
+          <option value="" disabled>
+            Select a reason
+          </option>
           {REASONS.map((reason) => (
-            <div className="form-check" key={reason}>
-              <input
-                className="form-check-input"
-                type="radio"
-                name="wrongReason"
-                id={reason}
-                value={reason}
-                checked={selectedReason === reason}
-                onChange={() => setSelectedReason(reason)}
-              />
-              <label className="form-check-label" htmlFor={reason}>
-                {reason.charAt(0).toUpperCase() + reason.slice(1)}
-              </label>
-            </div>
+            <option value={reason} key={reason}>
+              {reason.charAt(0).toUpperCase() + reason.slice(1)}
+            </option>
           ))}
-        </div>
-        <div className="mb-3">
-          <label htmlFor="wrongNotes" className="form-label">
-            Notes (optional):
-          </label>
-          <textarea
-            className="form-control"
-            id="wrongNotes"
-            rows={2}
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Add any notes about your mistake..."
-          />
-        </div>
-        {showSave && (
-          <button
-            className="btn btn-success"
-            onClick={handleSave}
-            disabled={isSaving || !selectedReason}
-          >
-            {isSaving ? 'Saving...' : 'Save'}
-          </button>
-        )}
-        {!showSave && savedReason && (
-          <div className="alert alert-info mt-3 mb-0 p-2">
-            <strong>Saved:</strong> {savedReason}
-            {savedNotes && <span className="ms-2">- {savedNotes}</span>}
-          </div>
-        )}
+        </select>
       </div>
+      <div className="mb-3">
+        <label htmlFor="wrongNotes" className="block text-gray-700 font-medium mb-1">
+          Notes:
+        </label>
+        <textarea
+          className="w-full rounded-lg border border-gray-300 p-2 focus:ring-2 focus:ring-blue-400 bg-white min-h-[48px]"
+          id="wrongNotes"
+          rows={2}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="Add any notes about your mistake..."
+        />
+      </div>
+      {showSave && (
+        <button
+          className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+          onClick={handleSave}
+          disabled={isSaving || !selectedReason}
+        >
+          {isSaving ? 'Saving...' : 'Save'}
+        </button>
+      )}
+      {/* {!showSave && savedReason && (
+        <div className="bg-blue-50 text-blue-800 rounded-lg px-3 py-2 mt-3 text-sm">
+          <strong>Saved:</strong> {savedReason}
+          {savedNotes && <span className="ml-2">- {savedNotes}</span>}
+        </div>
+      )} */}
     </div>
   );
 } 
