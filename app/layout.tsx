@@ -1,7 +1,4 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
 import Navbar from "./components/navbar";
-import BootstrapClient from "./components/BootstrapClient";
 import { AuthProvider } from './context/AuthContext';
 import './globals.css'
 
@@ -12,11 +9,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body data-bs-theme="light">
+      <body className="bg-gray-100">
         <AuthProvider>
           <Navbar />
           {children}
-          <BootstrapClient />
         </AuthProvider>
       </body>
     </html>

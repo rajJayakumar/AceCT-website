@@ -1,15 +1,33 @@
 {
     "math": {
-        "number and quantity": [],
-        "algebra": [],
-        "functions": [],
-        "geometry": [],
-        "statistics and probability": []
+        "number and quantity": [
+            5
+        ],
+        "algebra": [
+            1,
+            6,
+            9
+        ],
+        "functions": [
+            3,
+            10
+        ],
+        "geometry": [
+            2,
+            7
+        ],
+        "statistics and probability": [
+            4,
+            8
+        ]
     },
     "english": {
         "topic development in terms of purpose & focus": [
             3,
-            8
+            4,
+            7,
+            8,
+            12
         ],
         "organization, unity, and cohesion": [
             6,

@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 
 export type DifficultyLevel = 'easy' | 'medium' | 'hard';
 
@@ -29,21 +30,44 @@ export default function FilterSelectors({
 }: FilterSelectorsProps) {
     const [showStandards, setShowStandards] = useState(false);
     const [showLevels, setShowLevels] = useState(false);
+    const standardsRef = useRef<HTMLDivElement>(null);
+    const levelsRef = useRef<HTMLDivElement>(null);
+
+    // Close dropdowns when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (standardsRef.current && !standardsRef.current.contains(event.target as Node)) {
+                setShowStandards(false);
+            }
+            if (levelsRef.current && !levelsRef.current.contains(event.target as Node)) {
+                setShowLevels(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     return (
         <div className="space-y-4">
             {subject && standards.length > 0 && (
-                <div className="bg-white rounded-xl shadow border p-0">
+                <div ref={standardsRef} className="relative bg-white rounded-xl shadow border p-0">
                     <button
                         type="button"
                         className="w-full flex items-center justify-between px-4 py-3 text-left font-semibold text-gray-700 focus:outline-none"
                         onClick={() => setShowStandards((prev) => !prev)}
                     >
-                        <span>Standards ({selectedStandards.length} selected)</span>
-                        <i className={`bi bi-chevron-${showStandards ? 'up' : 'down'} text-lg`}></i>
+                        <span>Standards</span>
+                        {showStandards ? (
+                            <ChevronUpIcon className="w-5 h-5 text-gray-500" />
+                        ) : (
+                            <ChevronDownIcon className="w-5 h-5 text-gray-500" />
+                        )}
                     </button>
                     <div
-                        className={`transition-all duration-300 overflow-hidden ${showStandards ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'}`}
+                        className={`absolute top-full left-0 right-0 z-50 bg-white border border-gray-200 rounded-b-xl shadow-lg transition-all duration-300 overflow-hidden ${showStandards ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'}`}
                         aria-hidden={!showStandards}
                     >
                         <div className="px-4 pb-4">
@@ -80,17 +104,21 @@ export default function FilterSelectors({
                     </div>
                 </div>
             )}
-            <div className="bg-white rounded-xl shadow border p-0">
+            <div ref={levelsRef} className="relative bg-white rounded-xl shadow border p-0">
                 <button
                     type="button"
                     className="w-full flex items-center justify-between px-4 py-3 text-left font-semibold text-gray-700 focus:outline-none"
                     onClick={() => setShowLevels((prev) => !prev)}
                 >
-                    <span>Difficulty ({selectedLevels.length} selected)</span>
-                    <i className={`bi bi-chevron-${showLevels ? 'up' : 'down'} text-lg`}></i>
+                    <span>Difficulty</span>
+                    {showLevels ? (
+                        <ChevronUpIcon className="w-5 h-5 text-gray-500" />
+                    ) : (
+                        <ChevronDownIcon className="w-5 h-5 text-gray-500" />
+                    )}
                 </button>
                 <div
-                    className={`transition-all duration-300 overflow-hidden ${showLevels ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'}`}
+                    className={`absolute top-full left-0 right-0 z-50 bg-white border border-gray-200 rounded-b-xl shadow-lg transition-all duration-300 overflow-hidden ${showLevels ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'}`}
                     aria-hidden={!showLevels}
                 >
                     <div className="px-4 pb-4">

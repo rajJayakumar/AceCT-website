@@ -11,6 +11,14 @@ import { db } from '../firebase/firebaseConfig'
 import { useSearchParams } from 'next/navigation'
 import questionSet from '../components/questionSet.json'
 import levelSet from '../components/questionLevels.json'
+import { CalculatorIcon } from '@heroicons/react/24/solid';
+
+const SUBJECT_COLORS = {
+    math: "bg-blue-600",
+    science: "bg-green-600", 
+    reading: "bg-red-600",
+    english: "bg-yellow-500"
+}
 
 const STANDARDS = {
     math: [
@@ -49,21 +57,6 @@ const DIFFICULTY_LEVELS = ['easy', 'medium', 'hard'] as const;
 
 type SubjectType = keyof typeof STANDARDS;
 type DifficultyLevel = typeof DIFFICULTY_LEVELS[number];
-
-interface BaseQuestion {
-    id: number;
-    question: string;
-    choices: {
-        A: string,
-        B: string,
-        C: string,
-        D: string
-    };
-    correct_answer: string;
-    explanation: string;
-    standard: string;
-    passageID?: number;
-}
 
 interface Passage {
     id: number;
@@ -111,7 +104,6 @@ export default function PracticeClient() {
     const searchParams = useSearchParams();
     const [showCalculator, setShowCalculator] = useState(true);
     const [isCorrect, setIsCorrect] = useState(false);
-    const [showAI, setShowAI] = useState(false);
     const [oldQuestions, setOldQuestions] = useState<Set<number>>(new Set());
     const [isLoadingQuestions, setIsLoadingQuestions] = useState(true);
     const [selectedLevels, setSelectedLevels] = useState<DifficultyLevel[]>([...DIFFICULTY_LEVELS]);
@@ -123,6 +115,7 @@ export default function PracticeClient() {
     const [startQID, setStartQID] = useState<number | null>(null);
     const [noMoreQuestions, setNoMoreQuestions] = useState(false);
     const [aiSidebarOpen, setAISidebarOpen] = useState(false);
+    const [userData, setUserData] = useState<any>(null);
 
     // Initialize subject from URL parameters and set standards
     useEffect(() => {
@@ -151,6 +144,7 @@ export default function PracticeClient() {
     useEffect(() => {
         if (subject && selectedStandards.length > 0 && !isLoadingQuestions) {
             setCurrentQID(startQID);
+            console.log(`startQID: ${startQID}`);
             console.log(`current ID reset: ${startQID}`);
             fetchNextQuestion(startQID ?? undefined);
         }
@@ -177,6 +171,7 @@ export default function PracticeClient() {
         try {
             const userDoc = await getDoc(doc(db, 'users', user.uid));
             const userData = userDoc.data();
+            setUserData(userData); // Save for later use
             if (!userData?.questions?.[subject]) { return; }
 
             const subjectQuestions = userData.questions[subject];
@@ -196,6 +191,7 @@ export default function PracticeClient() {
         }
     
         const lastID = qidOverride ?? currentQID;
+        console.log(`lastID: ${lastID}`);
     
         // Pre-cache sets for selected standards
         const standardSets: Set<number>[] = selectedStandards.map(
@@ -207,8 +203,9 @@ export default function PracticeClient() {
             (level) => new Set(typedLevelSet[subject][level] || [])
         );
 
-        for (let i = lastID || 1; i < 11; i++) {
+        for (let i = lastID || 1; i < 15; i++) {
             if (oldQuestions.has(i)) {
+                console.log(`question ${i} is already in oldQuestions`);
                 continue;
             }
     
@@ -217,6 +214,7 @@ export default function PracticeClient() {
                 selectedLevels.length === 0 || levelSets.some(set => set.has(i));
     
             if (standardFit && difficultyFit) {
+                console.log(`question ${i} is a valid question`);
                 setCurrentQID(i)
                 setNoMoreQuestions(false);
                 return i;
@@ -334,9 +332,14 @@ export default function PracticeClient() {
         console.log(oldQuestions)
 
         try {
-            const userDoc = await getDoc(doc(db, 'users', user.uid));
-            const userData = userDoc.data();
-            const questions = userData?.questions || {};
+            let data = userData;
+            // Fallback: fetch if not loaded (shouldn't happen in normal flow)
+            if (!data) {
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                data = userDoc.data();
+                setUserData(data);
+            }
+            const questions = data?.questions || {};
             const subjectQuestions = questions[subject] || { old: {}, blackList: []};
 
             await updateDoc(doc(db, 'users', user.uid), {
@@ -350,7 +353,8 @@ export default function PracticeClient() {
                                 selected: selectedChoice,
                                 correct: isCorrect,
                                 date: Date.now(),
-                                time: timer // store time in seconds
+                                time: timer, // store time in seconds
+                                timeSpent: timer // also store as timeSpent for dashboard compatibility
                             }
                         },
                         startQID: startQID,
@@ -421,6 +425,15 @@ export default function PracticeClient() {
                 >
                     Next
                 </button>
+                {subject === 'math' && (
+                    <button 
+                        type="button"
+                        onClick={() => setShowCalculator((prev) => !prev)}
+                    >
+                        <CalculatorIcon className="w-10 h-10 text-black" />
+                    </button>
+                )}
+                
             </div>
             <button 
                 className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded px-4 py-2 flex items-center gap-2 transition"
@@ -434,16 +447,16 @@ export default function PracticeClient() {
     )
 
     return (
-        <div className="relative w-full max-w-7xl mx-auto px-2 py-30">
-            <div className={`flex flex-col md:flex-row gap-6 transition-all duration-300 ${aiSidebarOpen ? 'md:translate-x-[-200px]' : ''}`}
+        <div className="relative w-full max-w-8xl mx-auto px-40 py-30">
+            <div className={`flex flex-col md:flex-row gap-8 transition-all duration-300 ${aiSidebarOpen ? 'md:translate-x-[-220px]' : ''}`}
                 style={{ willChange: 'transform' }}>
                 {/* Left Sidebar */}
-                <div className="flex flex-col gap-4 w-full md:w-1/4 max-w-xs">
-                    <div className="bg-white rounded-xl shadow p-4 text-center">
-                        <h2 className="text-xl font-bold text-gray-800 mb-1">{subject ? subject.charAt(0).toUpperCase() + subject.slice(1) : ''}</h2>
+                <div className={`flex flex-col gap-6 w-full ${aiSidebarOpen ? ' pl-20 md:w-1/5' : 'md:w-1/5'} max-w-xs`}>
+                    <div className={`rounded-xl shadow-lg transition-shadow duration-300 hover:shadow-none p-6 text-center ${subject ? SUBJECT_COLORS[subject] : "bg-white"}`}>
+                        <h2 className="text-2xl font-bold text-white mb-2">{subject ? subject.charAt(0).toUpperCase() + subject.slice(1) : ''}</h2>
                     </div>
                     {/* Standards and Difficulty Selectors */}
-                    <div className="bg-white rounded-xl shadow p-4">
+                    <div className="bg-white rounded-xl shadow-lg transition-shadow duration-300 hover:shadow-none p-6">
                         <FilterSelectors
                             subject={subject}
                             selectedStandards={selectedStandards}
@@ -457,34 +470,42 @@ export default function PracticeClient() {
                         />
                     </div>
                     {/* Info Cards */}
-                    <div className="bg-white rounded-xl shadow p-4 flex items-center justify-between">
-                        <span className="font-semibold text-gray-700">Time</span>
-                        <span className="text-2xl font-bold text-blue-600">{formatTime(timer)}</span>
+                    <div className="bg-white rounded-xl shadow-lg transition-shadow duration-300 hover:shadow-none p-6 flex items-center justify-between">
+                        { aiSidebarOpen ? '' : <span className="font-semibold text-lg text-gray-700">Time</span> }
+                        <span className="text-3xl font-bold text-blue-600">{formatTime(timer)}</span>
                     </div>
-                    <div className="bg-white rounded-xl shadow p-4 flex items-center justify-between">
-                        <span className="font-semibold text-gray-700">Accuracy</span>
-                        <span className="text-2xl font-bold text-green-600">{accuracy}%</span>
+                    <div className="bg-white rounded-xl shadow-lg transition-shadow duration-300 hover:shadow-none p-6 flex items-center justify-between">
+                        { aiSidebarOpen ? '' : <span className="font-semibold text-lg text-gray-700">Accuracy</span> }
+                        <span className="text-3xl font-bold text-green-600">{accuracy}%</span>
                     </div>
                 </div>
                 {/* Main Content */}
-                <div className="flex-1 flex flex-col gap-6">
-                    <div className="flex flex-col md:flex-row gap-6">
+                <div className="flex-1 flex flex-col gap-8">
+                    <div className="flex flex-col md:flex-row gap-8">
+                        {/* Calculator for math with sliding animation, always on the left */}
                         {subject === 'math' && (
-                            <div className="w-full md:w-1/2">
-                                <DesmosCalculator show={showCalculator} />
-                            </div>
-                        )}
-                        {(subject === 'reading' || subject === 'english' || subject === 'science') && currentPassage && (
-                            <div className="w-full md:w-1/2">
-                                <div className="bg-white rounded-xl shadow p-4 h-full flex flex-col">
-                                    <h5 className="font-semibold mb-2">Passage</h5>
-                                    <div className="overflow-y-auto max-h-[400px] text-gray-700 whitespace-pre-wrap">
-                                        {currentPassage.passage}
-                                    </div>
+                            <div
+                                className={`order-1 relative transition-all duration-500 flex-none
+                                    ${showCalculator ? 'w-full md:w-1/2' : 'w-0 md:w-0'}
+                                `}
+                                style={{ minWidth: 0 }}
+                            >
+                                <div
+                                    className={`absolute inset-0 transition-all duration-500
+                                        ${showCalculator ? 'opacity-100 translate-x-0 pointer-events-auto' : 'opacity-0 -translate-x-full pointer-events-none'}
+                                    `}
+                                >
+                                    <DesmosCalculator show={showCalculator} />
                                 </div>
                             </div>
                         )}
-                        <div className="w-full md:w-1/2 flex flex-col gap-4">
+                        {/* QuestionCard always on the right, animates width */}
+                        <div
+                            className={`order-2 flex flex-col gap-6 transition-all duration-500
+                                ${subject === 'math' && showCalculator ? 'w-full md:w-1/2' : 'w-full'}
+                            `}
+                            style={{ minWidth: 0 }}
+                        >
                             <QuestionCard 
                                 question={questionToDisplay}
                                 selectedChoice={selectedChoice}
@@ -498,14 +519,14 @@ export default function PracticeClient() {
                 </div>
             </div>
             {/* AI Sidebar (slide-in) */}
-            <div className={`fixed top-0 right-0 h-full w-[340px] z-40 bg-white shadow-lg transition-transform duration-300 ease-in-out flex flex-col ${aiSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`} style={{maxHeight: '100vh'}}>
-                <div className="flex items-center justify-between mb-2 p-4 border-b">
-                    <h5 className="font-semibold mb-0">AceCT Assistant</h5>
-                    <button type="button" className="text-gray-400 hover:text-gray-700" onClick={toggleAI} aria-label="Close">
+            <div className={`fixed top-0 right-0 h-full w-[350px] z-40 bg-white shadow-lg transition-transform duration-300 ease-in-out flex flex-col ${aiSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`} style={{maxHeight: '100vh'}}>
+                <div className="flex items-center justify-between mb-2 p-6 border-b">
+                    <h5 className="font-semibold text-lg mb-0">AceCT Assistant</h5>
+                    <button type="button" className="text-gray-400 hover:text-gray-700 text-2xl" onClick={toggleAI} aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div className="flex-1 p-4 overflow-y-auto">
+                <div className="flex-1 p-6 overflow-y-auto">
                     <Chatbot question={questionToDisplay} />
                 </div>
             </div>
