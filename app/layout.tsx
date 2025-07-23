@@ -1,4 +1,5 @@
-import Navbar from "./components/navbar";
+import Head from "next/head";
+import Header from "./components/landing/Header";
 import { AuthProvider } from './context/AuthContext';
 import './globals.css'
 
@@ -9,9 +10,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <Head>AceCT</Head>
       <body className="bg-gray-100">
         <AuthProvider>
-          <Navbar />
+          <Header />
           {children}
         </AuthProvider>
       </body>

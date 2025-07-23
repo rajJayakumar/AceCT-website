@@ -3,15 +3,11 @@ import LoginForm from './LoginForm'
 
 export default function LoginPage() {
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-body">
-              <h1 className="card-title text-center mb-4">Login</h1>
-              <LoginForm />
-            </div>
-          </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
+      <div className="w-full max-w-md">
+        <div className="bg-white shadow-lg rounded-xl p-8">
+          <h1 className="text-2xl font-bold text-center mb-6">Login</h1>
+          <LoginForm />
         </div>
       </div>
     </div>

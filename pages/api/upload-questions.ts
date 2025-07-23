@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { db } from '@/app/firebase/firebaseAdmin';
+import { db } from '../../app/firebase/firebaseAdmin';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -23,11 +23,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // === If non-math subject, insert passage first ===
     if (subject.toLowerCase() !== 'math') {
-      const passageSnapshot = await db.collection(`passages-${subject}`).get();
+      const passageSnapshot = await db.collection(`passages`).get();
       const passageCount = passageSnapshot.size;
       passageID = (passageCount + 1).toString();
 
-      const passageRef = db.collection(`passages-${subject}`).doc(passageID);
+      const passageRef = db.collection(`passages`).doc(passageID);
       batch.set(passageRef, {
         ...questions.passage,
         id: passageID,
@@ -61,14 +61,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const ref = db.collection(subject).doc(newQuestionID);
       batch.set(ref, q);
 
+      const newID = Number.parseInt(newQuestionID)
       // --- Update setData ---
       if (
         setData[subject] &&
         q.standard &&
         setData[subject][q.standard] &&
-        !setData[subject][q.standard].includes(newQuestionID)
+        !setData[subject][q.standard].includes(newID)
       ) {
-        setData[subject][q.standard].push(newQuestionID);
+        setData[subject][q.standard].push(newID);
       }
 
       // --- Update levelsData ---
@@ -76,9 +77,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         levelsData[subject] &&
         q.difficulty &&
         levelsData[subject][q.difficulty] &&
-        !levelsData[subject][q.difficulty].includes(newQuestionID)
+        !levelsData[subject][q.difficulty].includes(newID)
       ) {
-        levelsData[subject][q.difficulty].push(newQuestionID);
+        levelsData[subject][q.difficulty].push(newID);
       }
     });
 

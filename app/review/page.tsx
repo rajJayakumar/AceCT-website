@@ -6,6 +6,7 @@ import { doc, getDoc, collection, getDocs } from 'firebase/firestore'
 import { db } from '../firebase/firebaseConfig'
 import questionSet from '../components/questionSet.json'
 import { useRouter } from 'next/navigation'
+import { useAuthRedirect } from '../hooks/useAuthRedirect';
 
 const STANDARDS = [
     "math",
@@ -40,6 +41,7 @@ interface UserQuestions {
 }
 
 export default function ReviewPage() {
+    useAuthRedirect();
     const [questions, setQuestions] = useState<Question[]>([]);
     const [userQuestions, setUserQuestions] = useState<UserQuestions>({});
     const [isLoading, setIsLoading] = useState(true);
@@ -74,17 +76,36 @@ export default function ReviewPage() {
         }
     };
 
-    const loadQuestions = async (subject: SubjectType) => {
+    const loadQuestions = async (subject: SubjectType | 'all') => {
         setIsLoading(true);
+
         try {
-            const questionsRef = collection(db, subject);
-            const snapshot = await getDocs(questionsRef);
-            const loadedQuestions = snapshot.docs.map(doc => ({
-                id: doc.id,
-                subject: subject,
-                ...doc.data()
-            })) as Question[];
-            setQuestions(loadedQuestions);
+            if (subject === 'all') {
+                const allSubjects: SubjectType[] = ['math', 'reading', 'english', 'science'];
+                const allSnapshots = await Promise.all(
+                    allSubjects.map(async (subj) => {
+                        const ref = collection(db, subj);
+                        const snap = await getDocs(ref);
+                        return snap.docs.map(doc => ({
+                            id: doc.id,
+                            subject: subj,
+                            ...doc.data()
+                        }));
+                    })
+                );
+
+                const combinedQuestions = allSnapshots.flat() as Question[];
+                setQuestions(combinedQuestions);
+            } else {
+                const questionsRef = collection(db, subject);
+                const snapshot = await getDocs(questionsRef);
+                const loadedQuestions = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    subject: subject,
+                    ...doc.data()
+                })) as Question[];
+                setQuestions(loadedQuestions);
+            }
         } catch (error) {
             console.error('Error loading questions:', error);
         } finally {
@@ -93,11 +114,7 @@ export default function ReviewPage() {
     };
 
     useEffect(() => {
-        if (selectedSubject !== 'all') {
-            loadQuestions(selectedSubject);
-        } else {
-            setQuestions([]);
-        }
+        loadQuestions(selectedSubject);
     }, [selectedSubject]);
 
     // Only show previously answered questions (in old)
@@ -142,6 +159,13 @@ export default function ReviewPage() {
         }
         return true;
     });
+
+    const SUBJECT_COLORS = {
+        'math' : 'text-blue-800 bg-blue-100',
+        'reading' : 'text-rose-800 bg-rose-100',
+        'english' : 'text-yellow-800 bg-yellow-100',
+        'science' : 'text-emerald-800 bg-emerald-100',
+    }
 
     return (
         <div className="max-w-7xl mx-auto mt-8 px-4">
@@ -189,7 +213,8 @@ export default function ReviewPage() {
                         <option value="wrong">Wrong</option>
                     </select>
                 </div>
-                <div>
+                <div className="flex items-center justify-center gap-2">
+                    From:  
                     <input 
                         type="date" 
                         className="w-full rounded-lg border border-gray-300 p-2 focus:ring-2 focus:ring-blue-400 bg-white shadow-lg transition-shadow duration-300 hover:shadow-none"
@@ -198,7 +223,8 @@ export default function ReviewPage() {
                         placeholder="Start Date"
                     />
                 </div>
-                <div>
+                <div className="flex items-center justify-center gap-2">
+                    To:
                     <input 
                         type="date" 
                         className="w-full rounded-lg border border-gray-300 p-2 focus:ring-2 focus:ring-blue-400 bg-white shadow-lg transition-shadow duration-300 hover:shadow-none"
@@ -238,13 +264,19 @@ export default function ReviewPage() {
                                 const date = getQuestionDate(question.id, question.subject);
                                 return (
                                     <tr
-                                        key={question.id}
+                                        key={`${question.subject}-${question.id}`}
                                         className={
                                             `${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'} cursor-pointer hover:bg-blue-50 transition`}
                                         onClick={() => router.push(`/review/questions?subject=${encodeURIComponent(question.subject)}&question=${encodeURIComponent(question.id)}`)}
                                     >
                                         <td className="py-2 px-4 font-mono">{question.id}</td>
-                                        <td className="py-2 px-4 capitalize">{question.subject}</td>
+                                        <td className="py-2 px-4 capitalize">
+                                            <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold 
+                                                ${SUBJECT_COLORS[question.subject as SubjectType]}`}
+                                            >
+                                                {question.subject}
+                                            </span>
+                                        </td>
                                         <td className="py-2 px-4">{question.standard}</td>
                                         <td className="py-2 px-4 max-w-xs truncate" title={question.question}>{question.question}</td>
                                         <td className="py-2 px-4">

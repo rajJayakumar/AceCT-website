@@ -77,8 +77,18 @@
         ]
     },
     "science": {
-        "interpretation of data": [],
-        "scientific investigation": [],
-        "evaluation of models, inferences, & experimental results": []
+        "interpretation of data": [
+            1,
+            4
+        ],
+        "scientific investigation": [
+            2,
+            5,
+            6
+        ],
+        "evaluation of models, inferences, & experimental results": [
+            3,
+            7
+        ]
     }
 }

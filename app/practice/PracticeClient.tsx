@@ -12,12 +12,14 @@ import { useSearchParams } from 'next/navigation'
 import questionSet from '../components/questionSet.json'
 import levelSet from '../components/questionLevels.json'
 import { CalculatorIcon } from '@heroicons/react/24/solid';
+import { PaperAirplaneIcon } from '@heroicons/react/24/solid'
+import { useAuthRedirect } from '../hooks/useAuthRedirect';
 
 const SUBJECT_COLORS = {
-    math: "bg-blue-600",
-    science: "bg-green-600", 
-    reading: "bg-red-600",
-    english: "bg-yellow-500"
+    math: "bg-blue-400",
+    science: "bg-emerald-400", 
+    reading: "bg-rose-400",
+    english: "bg-yellow-400"
 }
 
 const STANDARDS = {
@@ -91,6 +93,7 @@ const typedQuestionSet = questionSet as QuestionSet;
 const typedLevelSet = levelSet as QuestionSet;
 
 export default function PracticeClient() {
+    useAuthRedirect();
     const [currentQuestion, setCurrentQuestion] = useState<RegularQuestion | null>(null);
     const [currentPassage, setCurrentPassage] = useState<Passage | null>(null);
     const [selectedChoice, setSelectedChoice] = useState('');
@@ -119,7 +122,7 @@ export default function PracticeClient() {
 
     // Initialize subject from URL parameters and set standards
     useEffect(() => {
-        const subjectParam = searchParams.get('subject')?.toLowerCase();
+        const subjectParam = searchParams?.get('subject')?.toLowerCase();
         console.log('URL subject param:', subjectParam);
         
         if (subjectParam && subjectParam in STANDARDS) {
@@ -324,11 +327,11 @@ export default function PracticeClient() {
             return Math.round((newCorrect / newTotal) * 100);
         });
         //setCurrentQID(currentQuestion.id)
-        console.log(startQID, currentQuestion.id)
+        console.log(startQID, "cur:", currentQuestion.id)
         if (startQID === currentQuestion.id) {
             setStartQID(startQID + 1)
         }
-        setOldQuestions(prev => prev.add(currentQuestion.id))
+        setOldQuestions(prev => prev.add(parseInt(currentQuestion.id)))
         console.log(oldQuestions)
 
         try {
@@ -440,8 +443,8 @@ export default function PracticeClient() {
                 type="button"
                 onClick={toggleAI}
             >
-                <i className="bi bi-send"></i>
                 Ask AceCT
+                <PaperAirplaneIcon className="w-5 h-5 text-white"/>
             </button>
         </div>
     )
@@ -499,6 +502,17 @@ export default function PracticeClient() {
                                 </div>
                             </div>
                         )}
+                        {/* Passage */}
+                        {(subject === 'reading' || subject === 'english' || subject === 'science') && currentPassage && (
+                            <div className="w-full md:w-2/3">
+                                <div className="bg-white rounded-xl shadow p-4 h-full flex flex-col">
+                                    <h5 className="font-semibold mb-2">Passage</h5>
+                                    <div className="overflow-y-auto max-h-[400px] text-gray-700 whitespace-pre-wrap">
+                                        {currentPassage.passage}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                         {/* QuestionCard always on the right, animates width */}
                         <div
                             className={`order-2 flex flex-col gap-6 transition-all duration-500
@@ -521,8 +535,8 @@ export default function PracticeClient() {
             {/* AI Sidebar (slide-in) */}
             <div className={`fixed top-0 right-0 h-full w-[350px] z-40 bg-white shadow-lg transition-transform duration-300 ease-in-out flex flex-col ${aiSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`} style={{maxHeight: '100vh'}}>
                 <div className="flex items-center justify-between mb-2 p-6 border-b">
-                    <h5 className="font-semibold text-lg mb-0">AceCT Assistant</h5>
-                    <button type="button" className="text-gray-400 hover:text-gray-700 text-2xl" onClick={toggleAI} aria-label="Close">
+                    <h5 className="font-semibold text-lg mb-0 mt-15">AceCT Assistant</h5>
+                    <button type="button" className="text-gray-400 hover:text-gray-700 text-2xl mt-15" onClick={toggleAI} aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
