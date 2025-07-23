@@ -9,6 +9,8 @@ import Chatbot from "@/app/components/chatbot";
 import ReviewNotes from "../reviewNotes";
 import questionLevels from "@/app/components/questionLevels.json";
 import questionSet from "@/app/components/questionSet.json";
+import { useAuthRedirect } from '../../hooks/useAuthRedirect';
+import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
 
 type SubjectType = 'english' | 'reading' | 'math' | 'science';
 
@@ -38,8 +40,8 @@ interface Passage {
 const SUBJECT_COLORS: Record<string, string> = {
     math: 'bg-blue-100 text-blue-800',
     english: 'bg-yellow-100 text-yellow-800',
-    reading: 'bg-green-100 text-green-800',
-    science: 'bg-purple-100 text-purple-800',
+    reading: 'bg-rose-100 text-rose-800',
+    science: 'bg-emerald-100 text-emerald-800',
 };
 
 function getDifficulty(subject: string, id: number): string | null {
@@ -63,6 +65,7 @@ function getStandard(subject: string, id: number): string | null {
 const subjects: SubjectType[] = ['english', 'reading', 'math', 'science'];
 
 export default function ReviewQuestionPage() {
+    useAuthRedirect();
     const [currentQuestion, setCurrentQuestion] = useState<RegularQuestion | null>(null);
     const [currentPassage, setCurrentPassage] = useState<Passage | null>(null);
     const [selectedChoice, setSelectedChoice] = useState('');
@@ -81,8 +84,8 @@ export default function ReviewQuestionPage() {
 
     // Initialize subject from URL parameters
     useEffect(() => {
-        const subjectParam = searchParams.get('subject')?.toLowerCase();
-        const questionIDParam = searchParams.get('question');
+        const subjectParam = searchParams?.get('subject')?.toLowerCase();
+        const questionIDParam = searchParams?.get('question');
         if (subjectParam && questionIDParam && subjects.includes(subjectParam as SubjectType)) {
             setSubject(subjectParam as SubjectType);
             setQuestionID(parseInt(questionIDParam));
@@ -193,23 +196,26 @@ export default function ReviewQuestionPage() {
     }
 
     const buttons = (
-        <div className="flex justify-between items-center mt-3 gap-2">
+        <div className="flex flex-row gap-2 justify-between items-center mt-2">
+            <div className="flex gap-2">
+                <button 
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded px-4 py-2 transition disabled:opacity-50"
+                    onClick={handleSubmit}
+                    disabled={!selectedChoice || isSubmitted}
+                >
+                    {isSubmitted ? "Submitted" : "Submit"}
+                </button>
+            </div>
             <button 
-                className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700 transition disabled:opacity-50" 
-                onClick={handleSubmit}
-                disabled={!selectedChoice || isSubmitted}
-            >
-                {isSubmitted ? "Submitted" : "Submit"}
-            </button>
-            <button 
-                className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700 transition mt-2 flex items-center gap-2 w-fit" 
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded px-4 py-2 flex items-center gap-2 transition"
+                type="button"
                 onClick={toggleAI}
             >
-                <i className="bi bi-send mr-2"></i>
                 Ask AceCT
+                <PaperAirplaneIcon className="w-5 h-5 text-white"/>
             </button>
         </div>
-    );
+    )
 
     const difficulty = subject && currentQuestion ? getDifficulty(subject, currentQuestion.id) : null;
     const standard = subject && currentQuestion ? getStandard(subject, currentQuestion.id) : null;
@@ -240,6 +246,7 @@ export default function ReviewQuestionPage() {
                             <span className="font-semibold text-gray-700">Reviewed</span>
                             <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${isReviewed ? 'bg-purple-100 text-purple-800' : 'bg-gray-200 text-gray-700'}`}>{isReviewed ? 'Yes' : 'No'}</span>
                         </div>
+                        <span className="text-gray-600 text-sm font-small">Complete Question Analysis and answer question correctly</span>
                     </div>
                     <ReviewNotes 
                         subject={subject!} 
@@ -276,8 +283,8 @@ export default function ReviewQuestionPage() {
             {/* AI Sidebar (slide-in) */}
             <div className={`fixed top-0 right-0 h-full w-[340px] z-40 bg-white shadow-lg transition-transform duration-300 ease-in-out flex flex-col ${aiSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`} style={{maxHeight: '100vh'}}>
                 <div className="flex items-center justify-between mb-2 p-4 border-b">
-                    <h5 className="font-semibold mb-0">AceCT Assistant</h5>
-                    <button type="button" className="text-gray-400 hover:text-gray-700" onClick={() => setAISidebarOpen(false)} aria-label="Close">
+                    <h5 className="font-semibold mb-0 mt-15">AceCT Assistant</h5>
+                    <button type="button" className="text-gray-400 hover:text-gray-700 mt-15" onClick={() => setAISidebarOpen(false)} aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>

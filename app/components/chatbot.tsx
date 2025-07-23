@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from 'react'
 import { Message } from './types';
+import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
 
 interface BaseQuestion {
     question: string;
@@ -161,7 +162,7 @@ export default function Chatbot({ question }: { question: BaseQuestion }) {
                     {loading ? (
                         <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
                     ) : (
-                        <i className="bi bi-send text-lg"></i>
+                        <PaperAirplaneIcon className="w-5 h-5 text-white"/>
                     )}
                 </button>
             </div>

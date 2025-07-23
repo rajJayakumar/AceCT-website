@@ -1,6 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { CalculatorIcon, BookOpenIcon, LanguageIcon, BeakerIcon } from '@heroicons/react/24/solid'
+import { GraduationCap, GraduationCapIcon } from 'lucide-react';
 
 const subjectIcons: Record<string, (className: string) => React.ReactNode> = {
   calculator: (className) => <CalculatorIcon className={className} />, // Math
@@ -11,14 +12,14 @@ const subjectIcons: Record<string, (className: string) => React.ReactNode> = {
 
 const subjectBg: Record<string, string> = {
   blue: 'bg-blue-50',
-  green: 'bg-green-50',
-  sky: 'bg-sky-50',
+  emerald: 'bg-emerald-50',
+  rose: 'bg-rose-50',
   yellow: 'bg-yellow-50',
 };
 const subjectText: Record<string, string> = {
   blue: 'text-blue-600',
-  green: 'text-green-600',
-  sky: 'text-sky-600',
+  emerald: 'text-emerald-600',
+  rose: 'text-rose-600',
   yellow: 'text-yellow-600',
 };
 
@@ -33,19 +34,19 @@ export default function SubjectSelect() {
     {
       name: 'Reading',
       icon: 'book',
-      color: 'green',
+      color: 'rose',
       description: 'Improve reading comprehension and analysis',
     },
     {
       name: 'English',
       icon: 'translate',
-      color: 'sky',
+      color: 'yellow',
       description: 'Enhance grammar, vocabulary, and writing skills',
     },
     {
       name: 'Science',
       icon: 'flask',
-      color: 'yellow',
+      color: 'emerald',
       description: 'Explore scientific concepts and principles',
     },
   ];

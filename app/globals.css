@@ -2,3 +2,98 @@
 
 .animate-blink { animation: blink 1s steps(2, start) infinite; }
 @keyframes blink { to { visibility: hidden; } }
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+ @theme {
+    --color-background: hsl(0 0% 100%);
+    --color-foreground: hsl(222.2 84% 4.9%);
+
+    --color-card: hsl(0 0% 100%);
+    --color-card-foreground: hsl(222.2 84% 4.9%);
+
+    --color-popover: hsl(0 0% 100%);
+    --color-popover-foreground: hsl(222.2 84% 4.9%);
+
+    --color-primary: hsl(217 91% 60%);
+    --color-primary-gradient: hsl(240 100% 70%)
+    --color-primary-foreground: hsl(0 0% 100%);
+    --color-primary-glow: hsl(217 91% 70%);
+
+    --color-secondary: hsl(156 73% 59%);
+    --color-secondary-foreground: hsl(0 0% 100%);
+
+    --color-muted: hsl(220 13% 95%);
+    --color-muted-foreground: hsl(220 9% 46%);
+
+    --color-accent: hsl(240 5% 96%);
+    --color-accent-foreground: hsl(240 6% 10%);
+
+    --color-destructive: hsl(0 84.2% 60.2%);
+    --color-destructive-foreground: hsl(210 40% 98%);
+
+    --color-border: hsl(220 13% 91%);
+    --color-input: hsl(220 13% 91%);
+    --color-ring: hsl(217 91% 60%);
+
+    /* Custom gradients and effects */
+    --color-gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(240 100% 70%));
+    --color-gradient-secondary: linear-gradient(135deg, hsl(156 73% 59%), hsl(142 71% 45%));
+    --color-gradient-hero: linear-gradient(135deg, hsl(217 91% 60% / 0.1), hsl(240 100% 70% / 0.05));
+    
+    --color-shadow-lg: 0 10px 25px -3px hsl(217 91% 60% / 0.1), 0 4px 6px -2px hsl(217 91% 60% / 0.05);
+    --color-shadow-glow: 0 0 30px hsl(217 91% 60% / 0.3);
+    
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --radius: 0.5rem;
+
+    --color-sidebar-background: hsl(0 0% 98%);
+    --color-sidebar-foreground: hsl(240 5.3% 26.1%);
+    --color-sidebar-primary: hsl(240 5.9% 10%);
+    --color-sidebar-primary-foreground: hsl(0 0% 98%);
+    --color-sidebar-accent: hsl(240 4.8% 95.9%);
+    --color-sidebar-accent-foreground: hsl(240 5.9% 10%);
+    --color-sidebar-border: hsl(220 13% 91%);
+    --color-sidebar-ring: hsl(217.2 91.2% 59.8%);
+  }
+
+  .dark {
+    --color-background: hsl(222.2 84% 4.9%);
+    --color-foreground: hsl(210 40% 98%);
+
+    --color-card: hsl(222.2 84% 4.9%);
+    --color-card-foreground: hsl(210 40% 98%);
+
+    --color-popover: hsl(222.2 84% 4.9%);
+    --color-popover-foreground: hsl(210 40% 98%);
+
+    --color-primary: hsl(210 40% 98%);
+    --color-primary-foreground: hsl(222.2 47.4% 11.2%);
+
+    --color-secondary: hsl(217.2 32.6% 17.5%);
+    --color-secondary-foreground: hsl(210 40% 98%);
+
+    --color-muted: hsl(217.2 32.6% 17.5%);
+    --color-muted-foreground: hsl(215 20.2% 65.1%);
+
+    --color-accent: hsl(217.2 32.6% 17.5%);
+    --color-accent-foreground: hsl(210 40% 98%);
+
+    --color-destructive: hsl(0 62.8% 30.6%);
+    --color-destructive-foreground: hsl(210 40% 98%);
+
+    --color-border: hsl(217.2 32.6% 17.5%);
+    --color-input: hsl(217.2 32.6% 17.5%);
+    --color-ring: hsl(212.7 26.8% 83.9%);
+    --color-sidebar-background: hsl(240 5.9% 10%);
+    --color-sidebar-foreground: hsl(240 4.8% 95.9%);
+    --color-sidebar-primary: hsl(224.3 76.3% 48%);
+    --color-sidebar-primary-foreground: hsl(0 0% 100%);
+    --color-sidebar-accent: hsl(240 3.7% 15.9%);
+    --color-sidebar-accent-foreground: hsl(240 4.8% 95.9%);
+    --color-sidebar-border: hsl(240 3.7% 15.9%);
+    --color-sidebar-ring: hsl(217.2 91.2% 59.8%);
+  }
