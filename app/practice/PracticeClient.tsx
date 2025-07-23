@@ -331,7 +331,7 @@ export default function PracticeClient() {
         if (startQID === currentQuestion.id) {
             setStartQID(startQID + 1)
         }
-        setOldQuestions(prev => prev.add(parseInt(currentQuestion.id)))
+        setOldQuestions(prev => prev.add(parseInt(currentQuestion.id.toString())))
         console.log(oldQuestions)
 
         try {
